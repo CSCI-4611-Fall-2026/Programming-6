@@ -8,6 +8,7 @@ import * as gfx from 'gophergfx'
 
 export class App extends gfx.GfxApp
 {
+    private cylinder: gfx.Mesh3;
     private cameraControls: gfx.OrbitControls;
 
     // --- Create the App class ---
@@ -17,6 +18,7 @@ export class App extends gfx.GfxApp
         super();
 
         this.cameraControls = new gfx.OrbitControls(this.camera);
+        this.cylinder = new gfx.Mesh3();
     }
 
 
@@ -33,6 +35,10 @@ export class App extends gfx.GfxApp
         // Create a set of axes to visualize the world coordinate system.
         const axes = gfx.Geometry3Factory.createAxes();
         this.scene.add(axes);
+
+        this.createCylinderMesh(this.cylinder, 16, 2);
+        this.cylinder.material = new gfx.WireframeMaterial();
+        this.scene.add(this.cylinder);
     }
 
     
@@ -41,4 +47,41 @@ export class App extends gfx.GfxApp
     {
        this.cameraControls.update(deltaTime);
     }
-}
+
+    private createCylinderMesh(mesh: gfx.Mesh3, numSegments: number, height: number): void
+    {
+        const vertices: gfx.Vector3[] = [];
+        const indices: number[] = [];
+
+        const angleIncrement = (Math.PI * 2) / numSegments;
+
+        for(let i = 0; i <= numSegments; i++)
+        {
+            const angle = i * angleIncrement;
+
+            const topVertex = new gfx.Vector3(
+                Math.cos(angle),
+                height / 2,
+                Math.sin(angle)
+            );
+
+            const bottomVertex = new gfx.Vector3(
+                Math.cos(angle),
+                -height / 2,
+                Math.sin(angle)
+            );
+
+            vertices.push(topVertex);
+            vertices.push(bottomVertex);
+        }
+
+        for(let i = 0; i < numSegments; i++)
+        {
+            indices.push(i*2+1, i*2, i*2+2);
+            indices.push(i*2+1, i*2+2, i*2+3);
+        }
+
+        mesh.setVertices(vertices);
+        mesh.setIndices(indices);
+    }
+}``
